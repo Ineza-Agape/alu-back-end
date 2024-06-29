@@ -1,51 +1,45 @@
 #!/usr/bin/python3
-"""
-This script fetches the TODO list progress for a given employee ID from a REST API.
-"""
-
+""" just using some extra modules """
 import requests
 import sys
 
-def get_employee_todo_progress(id):
-    Name = f"https://jsonplaceholder.typicode.com/users/{id}"
-    todos = f"https://jsonplaceholder.typicode.com/todos?userId={id}"
-    
-    user_response = requests.get(Name)
-    if user_response.status_code != 200:
-        print("Error fetching user data")
-        return
-    # Fetch user name
-    user_data = user_response.json()
-    employee_name = user_data.get('name')
 
-    # Fetch todo list 
-    todos_response = requests.get(todos)
-    if todos_response.status_code != 200:
-        print("Error fetching TODO data")
-        return
-    
-    todos_data = todos_response.json()
+def getName():
+    """ getting user name """
+    payload = {'id': sys.argv[1]}
+    dataTwo = requests.get('https://jsonplaceholder.typicode.com/users',
+                           params=payload)
+    JDataTwo = dataTwo.json()
+    # print(JDataTwo[0]['name']
+    return JDataTwo[0]['name']
 
-    # Calculate completed and total tasks
-    total_tasks = len(todos_data)
-    done_tasks = [task for task in todos_data if task.get('completed')]
-    number_of_done_tasks = len(done_tasks)
 
-    # Print the first line of output
-    print(f"Employee {employee_name} is done with tasks({number_of_done_tasks}/{total_tasks}):")
+def getTask():
+    """ get task numbers and todos done  """
+    data = requests.get('https://jsonplaceholder.typicode.com/todos')
+    ToDoList = []
+    taskToDo = 0
+    taskDone = 0
+    JData = data.json()
+    DataLength = len(JData)
+    for i in range(0, DataLength):
+        com = int(sys.argv[1])
+        if JData[i]['userId'] == com:
+            taskToDo += 1
+            if JData[i]['completed'] is True:
+                ToDoList.append(JData[i]['title'])
+                taskDone += 1
+    # print(taskToDo)
+    # print(taskDone)
+    # print(ToDoList)
+    print("Employee {} is done with tasks({}/{}):"
+          .format(getName(), taskDone, taskToDo))
+    Lvalue = len(ToDoList)
+    for j in range(0, Lvalue):
+        print("\t {}".format(ToDoList[j]))
 
-    # Print the titles of completed tasks
-    for index, task in enumerate(done_tasks, start=1):
-        print(f"\t{index}. {task.get('title')}")
+""" addding docs everywhre """
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        sys.exit(1)
-    
-    try:
-        id = int(sys.argv[1])
-    except ValueError:
-        print("Employee ID must be an integer")
-        sys.exit(1)
-    
-    get_employee_todo_progress(id)
+    """ calling """
+    getTask()
